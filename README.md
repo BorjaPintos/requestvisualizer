@@ -10,7 +10,7 @@ npm start
 ## Configuration
 File config.js
 
-## Routes:
+## Paths:
 
 ```bash
 /200
@@ -20,10 +20,19 @@ For all http methods, it sends empty response with code 200
 For all http methods, it sends empty response with code 500
 
 /custom
-For all http methods, it sends custom response with code 200
+For all http methods, it sends custom response with custom code and custom headers
 
 /response
-POST, set custom response for the route /custom.
+POST, set custom body response for the path /custom.
+
+/code
+POST, set custom code response for the path /custom.
+
+/headers
+POST, set custom headers response for the path /custom. Use format json for define they.
+{
+  "X-custom-header":"valueHeader"
+}
 
 /*
 For all http methods, it sends empty response with code 404
