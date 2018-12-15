@@ -4,6 +4,8 @@ var request = require('request');
 var maxHistory = 100;
 var history = [];
 var customResponse = "";
+var customCode = 200;
+var customHeaders = [];
 
 
 router.get('/history', function(req, res) {
@@ -13,39 +15,77 @@ router.get('/history', function(req, res) {
 
 router.all('/200', function(req, res) {
   addToHistory(reqToString(req));
-  res.write("");
-  res.statusCode = 200;
-  res.end();
+  generateEmptyResponse(res, 200);
 });
 
 router.all('/500', function(req, res) {
   addToHistory(reqToString(req));
-  res.write("");
-  res.statusCode = 500;
-  res.end();
+  generateEmptyResponse(res, 500);
 });
 
 router.all('/custom', function(req, res) {
   addToHistory(reqToString(req));
-  res.write(customResponse);
-  res.statusCode = 200;
-  res.end();
+  generateCustomResponse(res);
 });
 
 router.post('/response', function(req, res) {
   addToHistory(reqToString(req));
   customResponse = req.body;
-  res.write(customResponse);
-  res.statusCode = 200;
+  generateCustomResponse(res);
   res.end();
+});
+
+router.post('/code', function(req, res) {
+  addToHistory(reqToString(req));
+  customCode = req.body;
+  if (!Number.isNaN(parseInt(req.body))){
+    customCode = parseInt(req.body);
+  }
+  generateCustomResponse(res);
+  res.end();
+});
+
+router.post('/headers', function(req, res) {
+  addToHistory(reqToString(req));
+  try{
+    customHeadersJson = JSON.parse(req.body);
+    if (customHeadersJson != undefined){
+        customHeaders = [];
+        customHeadersEntries = Object.entries(customHeadersJson);
+        for (i=0;i<customHeadersEntries.length;i++){
+          customHeaders[i] =customHeadersEntries[i];
+        }
+      }
+      generateCustomResponse(res);
+  } catch (e){
+    generateEmptyResponse(res, 400);
+  }
+  
 });
 
 router.all('/*', function(req, res) {
   addToHistory(reqToString(req));
-  res.write("");
-  res.statusCode = 404;
-  res.end();
+  generateEmptyResponse(res, 404);
 });
+
+var generateEmptyResponse = function(res, code){
+  res.statusCode = code;
+  res.write("");
+  res.end();
+}
+
+var generateCustomResponse =function(res){
+  res.statusCode = customCode;
+  addCustomHeaders(res);
+  res.write(customResponse);
+  res.end();
+}
+
+var addCustomHeaders = function(res){
+  for (i=0;i<customHeaders.length;i++){
+    res.setHeader(customHeaders[i][0], customHeaders[i][1]);
+  }
+}
 
 var addToHistory = function(element){
   if (history.length===maxHistory){
