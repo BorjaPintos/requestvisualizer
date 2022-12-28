@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var request = require('request');
 var maxHistory = 100;
 var history = [];
 var customResponse = "";
@@ -16,6 +15,11 @@ router.get('/history', function(req, res) {
 router.all('/200', function(req, res) {
   addToHistory(reqToString(req));
   generateEmptyResponse(res, 200);
+});
+
+router.all('/401', function(req, res) {
+  addToHistory(reqToString(req));
+  generateEmptyResponse(res, 401);
 });
 
 router.all('/500', function(req, res) {
